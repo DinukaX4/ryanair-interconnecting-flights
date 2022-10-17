@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: Ryanair Interconnecting Flight API
+  version: 1.0.0
+  contact:
+    name: "Ryanair"
+servers:
+  - url: "http://localhost:8080"
+
+paths:
+  '/flights/interconnections':
+    get:
+      parameters:
+        - in: query
+          name: departure
+          required: true
+          schema:
+            type: string
+            example: "DUB"
+        - in: query
+          name: arrival
+          required: true
+          schema:
+            type: string
+            example: "WRO"
+        - in: query
+          name: departureDateTime
+          required: true
+          schema:
+            type: string
+            description: "Time should be in the departure airport time zone"
+            example: "2022-11-0101T07:00"
+        - in: query
+          name: arrivalDateTime
+          required: true
+          schema:
+            type: string
+            description: "Time should be in the departure airport time zone"
+            example: "2018-03-03T21:00"
+      tags:
+        - schedule
+      description: Return List Of Available Flight Schedules
+      operationId: availability
+
+      responses:
+        '200':
+          description: Successful response OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response'
+
+
+        '400':
+          description: Error response when the server could not understand the request due to invalid syntax
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        stops:
+          type: number
+          example: 1
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Legs'
+
+    Legs:
+      type: object
+      properties:
+        departureAirport:
+          type: string
+          example: "DUB"
+        arrivalAirport:
+          type: string
+          example: "STN"
+        departureDateTime:
+          type: string
+          example: "2018-03-01T06:25"
+        arrivalDateTime:
+          type: string
+          example: "2018-03-01T07:35"
+
+    ErrorResponse:
+      description: The response object returning from the server end if there are any error occurred
+      type: object
+      properties:
+        errorCode:
+          $ref: '#/components/schemas/ErrorType'
+        errorDescription:
+          type: string
+
+    ErrorType:
+      type: string
+      enum:
+        - DATA_NOT_FOUND
+        - INTERNAL_SERVER_ERROR
+        - BAD_REQUEST
+        - THIRD_PARTY_SERVICE_UNAVAILABLE
