@@ -25,49 +25,43 @@ class ValidatorTest {
 
   @Test
   void validateRequest_Failed_Arrival() {
+    final FlightAvailabilityRequest request =
+        FlightAvailabilityRequest.builder()
+            .arrivalAirPort(null)
+            .departureAirPort("WRO")
+            .departureTime("2022-11-01T07:00")
+            .arrivalTime("2022-11-01T18:50")
+            .build();
     final Exception exception =
-        assertThrows(
-            ValidateException.class,
-            () ->
-                mockValidator.validateRequest(
-                    FlightAvailabilityRequest.builder()
-                        .arrivalAirPort(null)
-                        .departureAirPort("WRO")
-                        .departureTime("2022-11-01T07:00")
-                        .arrivalTime("2022-11-01T18:50")
-                        .build()));
+        assertThrows(ValidateException.class, () -> mockValidator.validateRequest(request));
     assertEquals("{INVALID_ARRIVAL=Arrival is required}", exception.getMessage());
   }
 
   @Test
   void validateRequest_Failed_Departure() {
+    final FlightAvailabilityRequest request =
+        FlightAvailabilityRequest.builder()
+            .arrivalAirPort("DUB")
+            .departureAirPort("")
+            .departureTime("2022-11-01T07:00")
+            .arrivalTime("2022-11-01T18:50")
+            .build();
     final Exception exception =
-        assertThrows(
-            ValidateException.class,
-            () ->
-                mockValidator.validateRequest(
-                    FlightAvailabilityRequest.builder()
-                        .arrivalAirPort("DUB")
-                        .departureAirPort("")
-                        .departureTime("2022-11-01T07:00")
-                        .arrivalTime("2022-11-01T18:50")
-                        .build()));
+        assertThrows(ValidateException.class, () -> mockValidator.validateRequest(request));
     assertEquals("{INVALID_DEPARTURE=Departure is required}", exception.getMessage());
   }
 
   @Test
   void validateRequest_Failed_Time() {
+    final FlightAvailabilityRequest request =
+        FlightAvailabilityRequest.builder()
+            .arrivalAirPort("DUB")
+            .departureAirPort("WRO")
+            .departureTime("2022--01T07:00")
+            .arrivalTime("2022-11-01T18:50")
+            .build();
     final Exception exception =
-        assertThrows(
-            ValidateException.class,
-            () ->
-                mockValidator.validateRequest(
-                    FlightAvailabilityRequest.builder()
-                        .arrivalAirPort("DUB")
-                        .departureAirPort("WRO")
-                        .departureTime("2022--01T07:00")
-                        .arrivalTime("2022-11-01T18:50")
-                        .build()));
+        assertThrows(ValidateException.class, () -> mockValidator.validateRequest(request));
     assertEquals("{TIME_INVALID=2022--01T07:00}", exception.getMessage());
   }
 }
