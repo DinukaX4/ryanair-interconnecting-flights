@@ -1,0 +1,26 @@
+[
+  {
+    "departureAirport": "DUB",
+    "arrivalAirport": "QWE",
+    "departureDateTime": "2022-11-01T13:20",
+    "arrivalDateTime": "2022-11-01T16:50"
+  },
+  {
+    "departureAirport": "QWE",
+    "arrivalAirport": "WRO",
+    "departureDateTime": "2022-11-01T14:20",
+    "arrivalDateTime": "2022-11-01T17:50"
+  },
+  {
+    "departureAirport": "DUB",
+    "arrivalAirport": "BBL",
+    "departureDateTime": "2022-11-02T16:15",
+    "arrivalDateTime": "2022-11-02T18:45"
+  },
+  {
+    "departureAirport": "BBL",
+    "arrivalAirport": "WRO",
+    "departureDateTime": "2022-11-02T21:15",
+    "arrivalDateTime": "2022-11-02T23:45"
+  }
+]

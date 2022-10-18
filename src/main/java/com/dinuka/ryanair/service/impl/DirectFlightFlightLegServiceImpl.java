@@ -2,17 +2,23 @@ package com.dinuka.ryanair.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.dinuka.ryanair.model.FlightAvailabilityRequest;
 import com.dinuka.ryanair.model.Leg;
 import com.dinuka.ryanair.rest.client.RyanairRestClient;
 import com.dinuka.ryanair.rest.model.AvailabilityRequest;
 import com.dinuka.ryanair.rest.model.AvailabilityRequest.AvailabilityRequestBuilder;
+import com.dinuka.ryanair.rest.model.Flight;
 import com.dinuka.ryanair.rest.model.FlightAvailability;
-import com.dinuka.ryanair.service.FlightLegService;
+import com.dinuka.ryanair.rest.model.FlightSchedule;
+import com.dinuka.ryanair.service.DirectFlightLegService;
 import com.dinuka.ryanair.util.DateTimeHelper;
 import com.dinuka.ryanair.util.DateTimeHelper.RyanairDate;
 
@@ -22,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DirectFlightFlightLegServiceImpl implements FlightLegService {
+public class DirectFlightFlightLegServiceImpl implements DirectFlightLegService {
 
   private final RyanairRestClient restClient;
 
@@ -39,8 +45,7 @@ public class DirectFlightFlightLegServiceImpl implements FlightLegService {
 
     if (arrivalDate.getYear() > departureDate.getYear()
         || arrivalDate.getMonth() > departureDate.getMonth()) {
-
-      return getDifferentYearsLegs(arrivalDate, departureDate, availabilityRequestBuilder);
+      return getDifferentYearsFlightLegs(arrivalDate, departureDate, availabilityRequestBuilder);
     } else {
       return getNormalLegs(
           arrivalDate, flightAvailabilityRequest, departureDate, availabilityRequestBuilder);
@@ -62,63 +67,94 @@ public class DirectFlightFlightLegServiceImpl implements FlightLegService {
                 .month(String.valueOf(departureDate.getMonth()))
                 .build());
 
-    flightAvailability.getFlightSchedules().stream()
-        .forEach(
-            flightSchedule ->
-                flights.addAll(
-                    flightSchedule.getFlights().stream()
-                        .filter(
-                            flight ->
-                                DateTimeHelper.isAfter(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            departureDate.getYear(),
-                                            Integer.parseInt(flightAvailability.getMonth()),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        departureDate.getLocalDateTime())
-                                    && DateTimeHelper.isBefore(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            arrivalDate.getYear(),
-                                            arrivalDate.getMonth(),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        arrivalDate.getLocalDateTime()))
-                        .map(
-                            flight ->
-                                Leg.builder()
-                                    .arrivalAirport(flightAvailabilityRequest.getArrivalAirPort())
-                                    .departureAirport(
-                                        flightAvailabilityRequest.getDepartureAirPort())
-                                    .arrivalDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getDepartureTime(),
-                                                departureDate.getYear(),
-                                                Integer.parseInt(flightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .departureDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getArrivalTime(),
-                                                departureDate.getYear(),
-                                                Integer.parseInt(flightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .build())
-                        .collect(Collectors.toList())));
+    if (getFlightAvailabilityPredicate().test(flightAvailability)) {
+      flightAvailability.getFlightSchedules().stream()
+          .forEach(
+              flightSchedule ->
+                  flights.addAll(
+                      flightSchedule.getFlights().stream()
+                          .filter(
+                              normalFlightLegFilter(
+                                  arrivalDate, departureDate, flightAvailability, flightSchedule))
+                          .map(
+                              buildNormalFlightLegs(
+                                  flightAvailabilityRequest,
+                                  departureDate,
+                                  flightAvailability,
+                                  flightSchedule))
+                          .collect(Collectors.toList())));
+    }
     return flights;
   }
 
+  @NotNull
+  private Predicate<FlightAvailability> getFlightAvailabilityPredicate() {
+    return result -> result != null && !CollectionUtils.isEmpty(result.getFlightSchedules());
+  }
+
+  @NotNull
+  private Function<Flight, Leg> buildNormalFlightLegs(
+      final FlightAvailabilityRequest flightAvailabilityRequest,
+      final RyanairDate departureDate,
+      final FlightAvailability flightAvailability,
+      final FlightSchedule flightSchedule) {
+    return flight ->
+        Leg.builder()
+            .arrivalAirport(flightAvailabilityRequest.getArrivalAirPort())
+            .departureAirport(flightAvailabilityRequest.getDepartureAirPort())
+            .arrivalDateTime(
+                DateTimeHelper.buildDate(
+                    flight.getArrivalTime(),
+                    DateTimeHelper.buildDate(
+                        flight.getDepartureTime(),
+                        departureDate.getYear(),
+                        Integer.parseInt(flightAvailability.getMonth()),
+                        Integer.parseInt(flightSchedule.getDay()))))
+            .departureDateTime(
+                DateTimeHelper.buildDate(
+                    flight.getDepartureTime(),
+                    DateTimeHelper.buildDate(
+                        flight.getArrivalTime(),
+                        departureDate.getYear(),
+                        Integer.parseInt(flightAvailability.getMonth()),
+                        Integer.parseInt(flightSchedule.getDay()))))
+            .build();
+  }
+
+  private Predicate<Flight> normalFlightLegFilter(
+      final RyanairDate arrivalDate,
+      final RyanairDate departureDate,
+      final FlightAvailability flightAvailability,
+      final FlightSchedule flightSchedule) {
+
+    return flight ->
+        DateTimeHelper.isAfter(
+                DateTimeHelper.buildDate(
+                    flight.getDepartureTime(),
+                    departureDate.getYear(),
+                    Integer.parseInt(flightAvailability.getMonth()),
+                    Integer.parseInt(flightSchedule.getDay())),
+                departureDate.getLocalDateTime())
+            && DateTimeHelper.isBefore(
+                DateTimeHelper.buildDate(
+                    flight.getArrivalTime(),
+                    arrivalDate.getYear(),
+                    arrivalDate.getMonth(),
+                    Integer.parseInt(flightSchedule.getDay())),
+                arrivalDate.getLocalDateTime());
+  }
+
   // this method is to get flights if the departure and the arrival is belongs to different years
-  private List<Leg> getDifferentYearsLegs(
+  private List<Leg> getDifferentYearsFlightLegs(
       final RyanairDate arrivalDate,
       final RyanairDate departureDate,
       final AvailabilityRequestBuilder availabilityRequestBuilder) {
 
     final AvailabilityRequest request = availabilityRequestBuilder.build();
 
+    final Predicate<FlightAvailability> isResultAvailable = getFlightAvailabilityPredicate();
     final List<Leg> flights = new ArrayList<>();
+    // get the departure year month availabilities
     final FlightAvailability departureFlightAvailability =
         getFlightAvailability(
             availabilityRequestBuilder
@@ -126,6 +162,7 @@ public class DirectFlightFlightLegServiceImpl implements FlightLegService {
                 .month(String.valueOf(departureDate.getMonth()))
                 .build());
 
+    // get the arrival year, month availabilities
     final FlightAvailability arrivalFlightAvailability =
         getFlightAvailability(
             availabilityRequestBuilder
@@ -133,122 +170,88 @@ public class DirectFlightFlightLegServiceImpl implements FlightLegService {
                 .month(String.valueOf(arrivalDate.getMonth()))
                 .build());
 
-    arrivalFlightLegs(arrivalDate, departureDate, request, flights, arrivalFlightAvailability);
+    if (isResultAvailable.test(arrivalFlightAvailability)) {
+      addFlightLegs(arrivalDate, departureDate, request, flights, arrivalFlightAvailability);
+    }
 
-    departureFlightLegs(arrivalDate, departureDate, request, flights, departureFlightAvailability);
+    if (isResultAvailable.test(departureFlightAvailability)) {
+      addFlightLegs(arrivalDate, departureDate, request, flights, departureFlightAvailability);
+    }
 
     return flights;
   }
 
-  private void departureFlightLegs(
+  private void addFlightLegs(
       final RyanairDate arrivalDate,
       final RyanairDate departureDate,
       final AvailabilityRequest request,
       final List<Leg> flights,
-      final FlightAvailability departureFlightAvailability) {
+      final FlightAvailability flightAvailability) {
 
-    departureFlightAvailability.getFlightSchedules().stream()
+    flightAvailability.getFlightSchedules().stream()
         .forEach(
             flightSchedule ->
                 flights.addAll(
                     flightSchedule.getFlights().stream()
                         .filter(
-                            flight ->
-                                DateTimeHelper.isAfter(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            departureDate.getYear(),
-                                            Integer.parseInt(
-                                                departureFlightAvailability.getMonth()),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        departureDate.getLocalDateTime())
-                                    && DateTimeHelper.isBefore(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            departureDate.getYear(),
-                                            Integer.parseInt(
-                                                departureFlightAvailability.getMonth()),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        arrivalDate.getLocalDateTime()))
+                            filterFlightLeg(
+                                arrivalDate, departureDate, flightAvailability, flightSchedule))
                         .map(
-                            flight ->
-                                Leg.builder()
-                                    .arrivalAirport(request.getArrivalAirPort())
-                                    .departureAirport(request.getDepartureAirPort())
-                                    .arrivalDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getDepartureTime(),
-                                                departureDate.getYear(),
-                                                Integer.parseInt(
-                                                    departureFlightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .departureDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getDepartureTime(),
-                                                departureDate.getYear(),
-                                                Integer.parseInt(
-                                                    departureFlightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .build())
+                            buildFlightLegs(
+                                arrivalDate, request, flightAvailability, flightSchedule))
                         .collect(Collectors.toList())));
   }
 
-  private void arrivalFlightLegs(
+  private Function<Flight, Leg> buildFlightLegs(
+      final RyanairDate arrivalDate,
+      final AvailabilityRequest request,
+      final FlightAvailability flightAvailability,
+      final FlightSchedule flightSchedule) {
+
+    return flight ->
+        Leg.builder()
+            .arrivalAirport(request.getArrivalAirPort())
+            .departureAirport(request.getDepartureAirPort())
+            .arrivalDateTime(
+                DateTimeHelper.buildDate(
+                    flight.getArrivalTime(),
+                    DateTimeHelper.buildDate(
+                        flight.getArrivalTime(),
+                        arrivalDate.getYear(),
+                        Integer.parseInt(flightAvailability.getMonth()),
+                        Integer.parseInt(flightSchedule.getDay()))))
+            .departureDateTime(
+                DateTimeHelper.buildDate(
+                    flight.getDepartureTime(),
+                    DateTimeHelper.buildDate(
+                        flight.getArrivalTime(),
+                        arrivalDate.getYear(),
+                        Integer.parseInt(flightAvailability.getMonth()),
+                        Integer.parseInt(flightSchedule.getDay()))))
+            .build();
+  }
+
+  private Predicate<Flight> filterFlightLeg(
       final RyanairDate arrivalDate,
       final RyanairDate departureDate,
-      final AvailabilityRequest request,
-      final List<Leg> flights,
-      final FlightAvailability arrivalFlightAvailability) {
-    arrivalFlightAvailability.getFlightSchedules().stream()
-        .forEach(
-            flightSchedule ->
-                flights.addAll(
-                    flightSchedule.getFlights().stream()
-                        .filter(
-                            flight ->
-                                DateTimeHelper.isAfter(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            arrivalDate.getYear(),
-                                            Integer.parseInt(arrivalFlightAvailability.getMonth()),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        departureDate.getLocalDateTime())
-                                    && DateTimeHelper.isBefore(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            arrivalDate.getYear(),
-                                            Integer.parseInt(arrivalFlightAvailability.getMonth()),
-                                            Integer.parseInt(flightSchedule.getDay())),
-                                        arrivalDate.getLocalDateTime()))
-                        .map(
-                            flight ->
-                                Leg.builder()
-                                    .arrivalAirport(request.getArrivalAirPort())
-                                    .departureAirport(request.getDepartureAirPort())
-                                    .arrivalDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getArrivalTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getArrivalTime(),
-                                                arrivalDate.getYear(),
-                                                Integer.parseInt(
-                                                    arrivalFlightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .departureDateTime(
-                                        DateTimeHelper.buildDate(
-                                            flight.getDepartureTime(),
-                                            DateTimeHelper.buildDate(
-                                                flight.getArrivalTime(),
-                                                arrivalDate.getYear(),
-                                                Integer.parseInt(
-                                                    arrivalFlightAvailability.getMonth()),
-                                                Integer.parseInt(flightSchedule.getDay()))))
-                                    .build())
-                        .collect(Collectors.toList())));
+      final FlightAvailability flightAvailability,
+      final FlightSchedule flightSchedule) {
+
+    return flight ->
+        DateTimeHelper.isAfter(
+                DateTimeHelper.buildDate(
+                    flight.getDepartureTime(),
+                    arrivalDate.getYear(),
+                    Integer.parseInt(flightAvailability.getMonth()),
+                    Integer.parseInt(flightSchedule.getDay())),
+                departureDate.getLocalDateTime())
+            && DateTimeHelper.isBefore(
+                DateTimeHelper.buildDate(
+                    flight.getArrivalTime(),
+                    arrivalDate.getYear(),
+                    Integer.parseInt(flightAvailability.getMonth()),
+                    Integer.parseInt(flightSchedule.getDay())),
+                arrivalDate.getLocalDateTime());
   }
 
   private FlightAvailability getFlightAvailability(final AvailabilityRequest availabilityRequest) {

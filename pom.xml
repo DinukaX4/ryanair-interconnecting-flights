@@ -86,14 +86,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.easetech/easytest &ndash;&gt;-->
-    <!--		<dependency>-->
-    <!--			<groupId>org.easetech</groupId>-->
-    <!--			<artifactId>easytest</artifactId>-->
-    <!--			<version>0.6.2</version>-->
-    <!--			<scope>test</scope>-->
-    <!--		</dependency>-->
-
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>

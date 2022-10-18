@@ -1,0 +1,39 @@
+{
+  "month": 11,
+  "flightSchedules": [
+    {
+      "day": 1,
+      "flights": [
+        {
+          "carrierCode": "FR",
+          "number": "1616",
+          "departureTime": "13:20",
+          "arrivalTime": "16:50"
+        },
+        {
+          "carrierCode": "FR",
+          "number": "1617",
+          "departureTime": "14:20",
+          "arrivalTime": "17:50"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "flights": [
+        {
+          "carrierCode": "FR",
+          "number": "1616",
+          "departureTime": "16:15",
+          "arrivalTime": "19:45"
+        },
+        {
+          "carrierCode": "FR",
+          "number": "1617",
+          "departureTime": "21:20",
+          "arrivalTime": "23:50"
+        }
+      ]
+    }
+  ]
+}

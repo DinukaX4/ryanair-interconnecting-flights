@@ -8,12 +8,11 @@ import lombok.Data;
 
 @Data
 public class Route {
-
   @JsonProperty("airportFrom")
-  private String from;
+  private String airportFrom;
 
   @JsonProperty("airportTo")
-  private String to;
+  private String airportTo;
 
   @JsonProperty("connectingAirport")
   private String connectingAirPort;

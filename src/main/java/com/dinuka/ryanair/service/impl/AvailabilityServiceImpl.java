@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import com.dinuka.ryanair.model.Availability;
 import com.dinuka.ryanair.model.FlightAvailabilityRequest;
 import com.dinuka.ryanair.service.AvailabilityService;
-import com.dinuka.ryanair.service.FlightLegService;
-import com.dinuka.ryanair.service.InterConnectedFlighLegService;
+import com.dinuka.ryanair.service.DirectFlightLegService;
+import com.dinuka.ryanair.service.InterConnectedFlightLegService;
 import com.dinuka.ryanair.service.RouteService;
 import com.dinuka.ryanair.util.DateTimeHelper;
 import com.dinuka.ryanair.util.DateTimeHelper.RyanairDate;
@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AvailabilityServiceImpl implements AvailabilityService {
 
-  private final FlightLegService flightLegService;
+  private final DirectFlightLegService directFlightLegService;
   private final RouteService routeService;
-  private final InterConnectedFlighLegService interConnectedFlighLegService;
+  private final InterConnectedFlightLegService interConnectedFlightLegService;
 
   @Override
   public List<Availability> getAvailability(
@@ -54,7 +54,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         Availability.builder()
             .stops(0)
             .legs(
-                flightLegService.getFlightLegs(
+                directFlightLegService.getFlightLegs(
                     arrivalDate, flightAvailabilityRequest, departureDate))
             .build());
 
@@ -67,18 +67,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
       final RyanairDate departureDate) {
 
     final Set<String> interconnectedFlightRoutes =
-        routeService.getInterconnectedFlightRoutes(
-            arrivalDate, flightAvailabilityRequest, departureDate);
+        routeService.getInterconnectedFlightRoutes(flightAvailabilityRequest);
 
     final List<Availability> availabilities = new ArrayList<>();
     availabilities.add(
         Availability.builder()
             .stops(1)
             .legs(
-                interConnectedFlighLegService.getInterconnectedFlightLegs(
-                    flightAvailabilityRequest.getArrivalAirPort(),
+                interConnectedFlightLegService.getInterconnectedFlightLegs(
                     arrivalDate,
-                    flightAvailabilityRequest.getDepartureAirPort(),
                     flightAvailabilityRequest,
                     departureDate,
                     interconnectedFlightRoutes))

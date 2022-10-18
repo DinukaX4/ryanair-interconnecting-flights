@@ -13,7 +13,6 @@ import org.springframework.util.StringUtils;
 import com.dinuka.ryanair.exception.ValidateException;
 import com.dinuka.ryanair.model.FlightAvailabilityRequest;
 
-// TODO add as an annotation
 @Component
 public class Validator {
 

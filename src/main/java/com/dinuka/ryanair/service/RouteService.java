@@ -3,12 +3,9 @@ package com.dinuka.ryanair.service;
 import java.util.Set;
 
 import com.dinuka.ryanair.model.FlightAvailabilityRequest;
-import com.dinuka.ryanair.util.DateTimeHelper.RyanairDate;
 
+/** Provide Route Services */
 public interface RouteService {
 
-  Set<String> getInterconnectedFlightRoutes(
-      RyanairDate arrivalDate,
-      FlightAvailabilityRequest flightAvailabilityRequest,
-      RyanairDate departureDate);
+  Set<String> getInterconnectedFlightRoutes(FlightAvailabilityRequest flightAvailabilityRequest);
 }

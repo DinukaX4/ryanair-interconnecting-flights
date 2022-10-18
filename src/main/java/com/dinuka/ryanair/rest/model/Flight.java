@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class Flight {
-
   @JsonProperty("carrierCode")
   private String carrierCode;
 

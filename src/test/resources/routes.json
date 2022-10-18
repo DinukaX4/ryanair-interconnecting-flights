@@ -1,0 +1,98 @@
+[
+  {
+    "airportFrom": "DUB",
+    "airportTo": "WRO",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "DUB",
+    "airportTo": "AAL",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "AAL",
+    "airportTo": "WRO",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "DUB",
+    "airportTo": "QWE",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "QWE",
+    "airportTo": "WRO",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "DUB",
+    "airportTo": "ABC",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "ABC",
+    "airportTo": "CDE",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  },
+  {
+    "airportFrom": "CDE",
+    "airportTo": "WRO",
+    "connectingAirport": null,
+    "newRoute": false,
+    "seasonalRoute": false,
+    "operator": "RYANAIR",
+    "carrierCode": "FR",
+    "group": "GENERIC",
+    "similarArrivalAirportCodes": [],
+    "tags": []
+  }
+]

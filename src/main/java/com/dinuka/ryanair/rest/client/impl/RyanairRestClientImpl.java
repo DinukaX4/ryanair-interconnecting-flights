@@ -20,6 +20,7 @@ import com.dinuka.ryanair.rest.client.RyanairRestClient;
 import com.dinuka.ryanair.rest.model.AvailabilityRequest;
 import com.dinuka.ryanair.rest.model.FlightAvailability;
 import com.dinuka.ryanair.rest.model.Route;
+import com.dinuka.ryanair.util.Constant;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,8 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RyanairRestClientImpl implements RyanairRestClient {
 
-  private static final String BASE_URL = "https://services-api.ryanair.com";
-
   private final RetryTemplate retryTemplate;
   private final RestTemplate restTemplate;
 
@@ -41,7 +40,7 @@ public class RyanairRestClientImpl implements RyanairRestClient {
   public List<Route> getAvailableRoutes() {
 
     final UriComponents uriComponents =
-        UriComponentsBuilder.fromUriString(BASE_URL).path("/locate/3/routes").build();
+        UriComponentsBuilder.fromUriString(Constant.BASE_URL).path("/locate/3/routes").build();
 
     final ResponseEntity<List<Route>> response =
         retryTemplate.execute(
@@ -58,20 +57,20 @@ public class RyanairRestClientImpl implements RyanairRestClient {
           response.getStatusCode(),
           new ObjectMapper().writeValueAsString(response.getBody()));
     } catch (JsonProcessingException e) {
-      log.trace("minor log");
+      log.trace(Constant.MINOR_LOG);
     }
     return Objects.requireNonNull(response.getBody()).stream()
         .filter(
             route ->
                 "RYANAIR".equals(route.getOperator())
-                    && StringUtils.isEmpty(route.getConnectingAirPort()))
+                    && !StringUtils.hasLength(route.getConnectingAirPort()))
         .collect(Collectors.toList());
   }
 
   @Override
   public FlightAvailability getFlightAvailability(final AvailabilityRequest request) {
     final UriComponents uriComponents =
-        UriComponentsBuilder.fromUriString(BASE_URL)
+        UriComponentsBuilder.fromUriString(Constant.BASE_URL)
             .path("/timtbl/3/schedules/{departure}/{arrival}/years/{year}/months/{month}")
             .buildAndExpand(
                 request.getDepartureAirPort(),
@@ -83,7 +82,7 @@ public class RyanairRestClientImpl implements RyanairRestClient {
       log.info(
           "Get flight availability request {}", new ObjectMapper().writeValueAsString(request));
     } catch (JsonProcessingException e) {
-      log.trace("minor log");
+      log.trace(Constant.MINOR_LOG);
     }
 
     final ResponseEntity<FlightAvailability> response =
@@ -101,7 +100,7 @@ public class RyanairRestClientImpl implements RyanairRestClient {
           response.getStatusCode(),
           new ObjectMapper().writeValueAsString(response.getBody()));
     } catch (JsonProcessingException e) {
-      log.trace("minor log");
+      log.trace(Constant.MINOR_LOG);
     }
     return response.getBody();
   }

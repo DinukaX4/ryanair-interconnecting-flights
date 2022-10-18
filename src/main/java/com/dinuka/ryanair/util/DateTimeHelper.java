@@ -1,13 +1,13 @@
 package com.dinuka.ryanair.util;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public final class DateTimeHelper {
 
   private DateTimeHelper() {}
@@ -24,22 +24,12 @@ public final class DateTimeHelper {
 
   public static boolean isBefore(
       final LocalDateTime flightArrivalTime, final LocalDateTime arrivalTime) {
-    //    log.info(
-    //        "is before flightDepartureTime {}, departureTime {}, result {}",
-    //        flightArrivalTime,
-    //        arrivalTime,
-    //        flightArrivalTime.isBefore(arrivalTime));
-    return flightArrivalTime.isBefore(arrivalTime);
+    return Duration.between(flightArrivalTime, arrivalTime).getSeconds() >= 0;
   }
 
   public static boolean isAfter(
       final LocalDateTime flightDepartureTime, final LocalDateTime departureTime) {
-    //    log.info(
-    //        "is after flightDepartureTime {}, departureTime {}, result {}",
-    //        flightDepartureTime,
-    //        departureTime,
-    //        flightDepartureTime.isAfter(departureTime));
-    return flightDepartureTime.isAfter(departureTime);
+    return Duration.between(flightDepartureTime, departureTime).getSeconds() <= 0;
   }
 
   public static String buildDate(final String time, final LocalDateTime dateTime) {
@@ -54,6 +44,7 @@ public final class DateTimeHelper {
 
   @Builder
   @Getter
+  @EqualsAndHashCode
   public static final class RyanairDate {
     private final int year;
     private final int month;

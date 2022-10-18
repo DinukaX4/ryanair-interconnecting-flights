@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -53,7 +52,7 @@ public class ApplicationConfiguration {
           .collect(toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
   @Bean
-  public RestTemplate restTemplate(final HttpClient httpClient) {
+  public RestTemplate restTemplate() {
     final RestTemplate restTemplate = new RestTemplate();
 
     final OkHttpClient.Builder builder = new OkHttpClient.Builder();
