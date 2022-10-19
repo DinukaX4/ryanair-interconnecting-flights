@@ -1,0 +1,14 @@
+[
+  {
+    "departureAirport": "BBL",
+    "arrivalAirport": "WRO",
+    "departureDateTime": "2022-11-02T21:15",
+    "arrivalDateTime": "2022-11-02T23:45"
+  },
+  {
+    "departureAirport": "DUB",
+    "arrivalAirport": "BBL",
+    "departureDateTime": "2022-11-02T16:15",
+    "arrivalDateTime": "2022-11-02T18:45"
+  }
+]

@@ -27,8 +27,6 @@ import com.dinuka.ryanair.rest.client.RyanairRestClient;
 import com.dinuka.ryanair.rest.model.AvailabilityRequest;
 import com.dinuka.ryanair.rest.model.FlightAvailability;
 import com.dinuka.ryanair.util.DateTimeHelper.RyanairDate;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -37,15 +35,17 @@ class DirectFlightFlightLegServiceImplTest {
 
   @InjectMocks DirectFlightFlightLegServiceImpl mockDirectFlightFlightLegService;
   @Mock RyanairRestClient mockRestClient;
+  private Gson gson;
 
   @BeforeEach
   void setUp() throws Exception {
     openMocks(this).close();
+    gson = new Gson();
   }
 
   @Test
   void getFlightLegs_same_year_same_month() throws FileNotFoundException {
-    final Gson gson = new Gson();
+
     final FlightAvailability availability =
         gson.fromJson(
             new JsonReader(
@@ -83,11 +83,7 @@ class DirectFlightFlightLegServiceImplTest {
                 .arrivalAirPort("WRO")
                 .build(),
             departureDate);
-    try {
-      System.out.println(new ObjectMapper().writeValueAsString(results));
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+
     assertNotNull(results);
     assertEquals(3, results.size());
     assertTrue(
@@ -115,7 +111,7 @@ class DirectFlightFlightLegServiceImplTest {
 
   @Test
   void getFlightLegs_same_year_same_month_equal_departure_time() throws FileNotFoundException {
-    final Gson gson = new Gson();
+
     final FlightAvailability availability =
         gson.fromJson(
             new JsonReader(
@@ -169,7 +165,7 @@ class DirectFlightFlightLegServiceImplTest {
 
   @Test
   void getFlightLegs_same_year_same_month_equal_arrival_time() throws FileNotFoundException {
-    final Gson gson = new Gson();
+
     final FlightAvailability availability =
         gson.fromJson(
             new JsonReader(
@@ -258,7 +254,7 @@ class DirectFlightFlightLegServiceImplTest {
 
   @Test
   void getFlightLegs_same_year_different_month() throws FileNotFoundException {
-    final Gson gson = new Gson();
+
     final List<FlightAvailability> availabilities =
         gson.fromJson(
             new JsonReader(

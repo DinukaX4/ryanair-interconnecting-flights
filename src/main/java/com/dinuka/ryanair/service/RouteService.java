@@ -4,8 +4,13 @@ import java.util.Set;
 
 import com.dinuka.ryanair.model.FlightAvailabilityRequest;
 
-/** Provide Route Services */
 public interface RouteService {
 
+  /**
+   * Provide the availability stops for the given arrival and departure airports
+   *
+   * @param flightAvailabilityRequest includes departure airport and arrival airport
+   * @return include all available stops
+   */
   Set<String> getInterconnectedFlightRoutes(FlightAvailabilityRequest flightAvailabilityRequest);
 }

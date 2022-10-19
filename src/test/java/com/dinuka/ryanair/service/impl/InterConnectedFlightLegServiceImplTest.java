@@ -1,8 +1,12 @@
 package com.dinuka.ryanair.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -11,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,19 +35,12 @@ class InterConnectedFlightLegServiceImplTest {
   private FlightAvailabilityRequest request;
   private RyanairDate departureDate;
   private RyanairDate arrivalDate;
+  private Gson gson;
 
   @BeforeEach
   void setUp() throws Exception {
     openMocks(this).close();
-
-    final Gson gson = new Gson();
-    final List<Leg> legs =
-        gson.fromJson(
-            new JsonReader(
-                new FileReader(
-                    Objects.requireNonNull(this.getClass().getResource("/legs.json")).getFile())),
-            new TypeToken<List<Leg>>() {}.getType());
-
+    gson = new Gson();
     request =
         FlightAvailabilityRequest.builder()
             .arrivalTime("2022-11-02T23:45:00")
@@ -68,6 +64,17 @@ class InterConnectedFlightLegServiceImplTest {
             .month(11)
             .year(2022)
             .build();
+  }
+
+  @Test
+  void getInterconnectedFlightLegs() throws FileNotFoundException {
+
+    final List<Leg> legs =
+        gson.fromJson(
+            new JsonReader(
+                new FileReader(
+                    Objects.requireNonNull(this.getClass().getResource("/legs.json")).getFile())),
+            new TypeToken<List<Leg>>() {}.getType());
 
     when(mockDirectFlightFlightLegService.getFlightLegs(
             arrivalDate, request.toBuilder().departureAirPort("QWE").build(), departureDate))
@@ -84,15 +91,28 @@ class InterConnectedFlightLegServiceImplTest {
     when(mockDirectFlightFlightLegService.getFlightLegs(
             arrivalDate, request.toBuilder().arrivalAirPort("BBL").build(), departureDate))
         .thenReturn(Collections.singletonList(legs.get(2)));
+    final List<Leg> results =
+        mockInterConnectedFlightLegService.getInterconnectedFlightLegs(
+            arrivalDate, request, departureDate, new HashSet<>(Arrays.asList("QWE", "BBL")));
+
+    assertNotNull(results);
+    assertEquals(2, results.size());
+    assertTrue(results.stream().anyMatch(leg -> "BBL".equals(leg.getArrivalAirport())));
+    assertTrue(results.stream().anyMatch(leg -> "BBL".equals(leg.getDepartureAirport())));
   }
 
   @Test
-  void getInterconnectedFlightLegs() {
+  void getInterconnectedFlightLegs_no_results() {
+
+    when(mockDirectFlightFlightLegService.getFlightLegs(
+            arrivalDate, request.toBuilder().departureAirPort("QWE").build(), departureDate))
+        .thenReturn(Collections.emptyList());
 
     final List<Leg> results =
         mockInterConnectedFlightLegService.getInterconnectedFlightLegs(
             arrivalDate, request, departureDate, new HashSet<>(Arrays.asList("QWE", "BBL")));
 
-    Assertions.assertNotNull(results);
+    assertNotNull(results);
+    assertEquals(0, results.size());
   }
 }

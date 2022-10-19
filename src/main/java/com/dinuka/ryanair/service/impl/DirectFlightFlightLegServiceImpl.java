@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -87,12 +86,10 @@ public class DirectFlightFlightLegServiceImpl implements DirectFlightLegService 
     return flights;
   }
 
-  @NotNull
   private Predicate<FlightAvailability> getFlightAvailabilityPredicate() {
     return result -> result != null && !CollectionUtils.isEmpty(result.getFlightSchedules());
   }
 
-  @NotNull
   private Function<Flight, Leg> buildNormalFlightLegs(
       final FlightAvailabilityRequest flightAvailabilityRequest,
       final RyanairDate departureDate,
