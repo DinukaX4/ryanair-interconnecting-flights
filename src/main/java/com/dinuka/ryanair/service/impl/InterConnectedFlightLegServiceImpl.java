@@ -72,7 +72,7 @@ public class InterConnectedFlightLegServiceImpl implements InterConnectedFlightL
                     LocalDateTime.parse(firstLeg.getArrivalDateTime()),
                     LocalDateTime.parse(secondLeg.getDepartureDateTime()))
                 .getSeconds()
-            >= 3600) {
+            >= 7200) {
           isFirstLegEligible = true;
           legs.add(secondLeg);
         }
