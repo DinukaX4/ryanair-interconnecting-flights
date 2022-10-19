@@ -13,7 +13,7 @@
 
   <groupId>com.dinuka.ryanair</groupId>
   <artifactId>ryanair-interconnecting-flights</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <name>ryanair-interconnecting-flights</name>
   <description>Ryanair Interconnecting Flights</description>
 

@@ -7,4 +7,4 @@ logging:
   level:
     root: WARN
     org.springframework: WARN
-    com.dinuka: DEBUG
+    com.dinuka: INFO

@@ -8,7 +8,19 @@ import com.dinuka.ryanair.rest.model.Route;
 
 public interface RyanairRestClient {
 
+  /**
+   * Provide the Ryanair Route response
+   *
+   * @return response
+   */
   List<Route> getAvailableRoutes();
 
+  /**
+   * Provide the Flight schedules for the given request
+   *
+   * @param request request includes arrival airport departure airport schedule requested year
+   *     schedule requested month
+   * @return flight schedules
+   */
   FlightAvailability getFlightAvailability(AvailabilityRequest request);
 }
